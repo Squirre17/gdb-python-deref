@@ -76,7 +76,7 @@ class DereferenceLinkedList(gdb.Command):
             print("[-] Usage: dll <address> [struct name] [next tag]")
             return
 
-        # memory struct name and tag
+        # memorize struct name and tag
         try:
             ptr_type = args[1]
             self.node_ptr_type = ptr_type
