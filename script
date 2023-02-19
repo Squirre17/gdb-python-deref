@@ -1,0 +1,5 @@
+b 56
+so ./deref.py
+r
+p head
+dll 0x4052a0 0x10
