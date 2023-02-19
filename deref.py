@@ -65,21 +65,33 @@ class DereferenceLinkedList(gdb.Command):
             node_ptr_val = node_ptr_deref + node_ptr_offset
             node_ptr = gdb.Value(int(node_ptr_val)).cast(node_ptr_type)
     
+    node_ptr_type = "mylist"
+    tag           = "next"
+
     @only_when_running
     @handle_exception
     def invoke(self, arg, from_tty):
         args = gdb.string_to_argv(arg)
-        if len(args) != 1:
-            print("[-] Usage: dll <struct_ptr> <node_ptr_offset>")
+        if len(args) < 1:
+            print("[-] Usage: dll <address> [struct name] [next tag]")
             return
 
+        # memory struct name and tag
+        try:
+            ptr_type = args[1]
+            self.node_ptr_type = ptr_type
+            tag = args[2]
+            self.tag = tag
+        except IndexError:
+            pass
+
         struct_ptr = args[0]
-        node_ptr_type = "struct mylist"            # Replace with your node type
         ptr_val = gdb.parse_and_eval(struct_ptr)
 
-        node_ptr = gdb.Value(int(ptr_val)).cast(gdb.lookup_type(node_ptr_type).pointer())
+        ptr_of_type = gdb.lookup_type(self.node_ptr_type).pointer()
+        node_ptr = gdb.Value(int(ptr_val)).cast(ptr_of_type)
         while node_ptr:
             print(node_ptr.dereference())
-            node_ptr = node_ptr['next']            # Replace with your node tag
+            node_ptr = node_ptr[self.tag]            # Replace with your node tag
 
 DereferenceLinkedList()
