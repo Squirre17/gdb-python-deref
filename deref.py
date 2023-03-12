@@ -73,7 +73,7 @@ class DereferenceLinkedList(gdb.Command):
     def invoke(self, arg, from_tty):
         args = gdb.string_to_argv(arg)
         if len(args) < 1:
-            print("[-] Usage: dll <address> [struct name] [next tag]")
+            print("[-] Usage: dll <address> [struct name] [next tag] [max depth]")
             return
 
         # memorize struct name and tag
@@ -82,6 +82,13 @@ class DereferenceLinkedList(gdb.Command):
             self.node_ptr_type = ptr_type
             tag = args[2]
             self.tag = tag
+            md = args[3]
+            try:
+                self.max_depth = int(md)
+            except ValueError:
+                self.max_depth = int(md, 16)
+            except Exception as e:
+                raise e
         except IndexError:
             pass
 
@@ -90,8 +97,15 @@ class DereferenceLinkedList(gdb.Command):
 
         ptr_of_type = gdb.lookup_type(self.node_ptr_type).pointer()
         node_ptr = gdb.Value(int(ptr_val)).cast(ptr_of_type)
+        idx = 0
         while node_ptr:
+            print(f"[{idx}]", end="")
             print(node_ptr.dereference())
+            # node_ptr = node_ptr.cast(ptr_of_type)
             node_ptr = node_ptr[self.tag]            # Replace with your node tag
+            node_ptr = node_ptr.cast(ptr_of_type)
+            idx += 1
+            if idx > self.max_depth:
+                break
 
 DereferenceLinkedList()
